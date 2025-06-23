@@ -22,16 +22,17 @@ public class Users {
     @NotNull
     private String email;
 
-
-    public Long getId() {
-        return id;
+    public Users() {
     }
 
     public Users(Long id, String name, String email) {
         this.id = id;
         this.name = name;
         this.email = email;
+    }
 
+    public Long getId() {
+        return id;
     }
 
     public void setId(Long id) {

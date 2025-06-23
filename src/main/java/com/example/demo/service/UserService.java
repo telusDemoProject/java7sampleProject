@@ -15,13 +15,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public List<Users> getAllUsers() {
-        List<Users> result = new ArrayList<Users>();
-        Iterable<Users> all = userRepository.findAll();
-        Iterator<Users> iterator = all.iterator();
-        while (iterator.hasNext()) {
-            result.add(iterator.next());
-        }
-        return result;
+        return userRepository.findAll();
     }
 
 
