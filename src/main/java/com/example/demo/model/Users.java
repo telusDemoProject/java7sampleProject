@@ -22,6 +22,7 @@ public class Users {
     @NotNull
     private String email;
 
+
     public Long getId() {
         return id;
     }
@@ -30,6 +31,7 @@ public class Users {
         this.id = id;
         this.name = name;
         this.email = email;
+
     }
 
     public void setId(Long id) {
