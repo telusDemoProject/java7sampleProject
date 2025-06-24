@@ -4,6 +4,7 @@ package com.example.demo.controller;
 import com.example.demo.service.UserService;
 import com.example.demo.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -13,8 +14,12 @@ import java.util.*;
 @RequestMapping("/users")
 public class UserController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<Users> getAllUsers() {
@@ -22,9 +27,13 @@ public class UserController {
     }
 
     @PostMapping
-    public String addUser(@Valid @RequestBody Users users) {
-        userService.addUser(users);
-        return "Users added";
+    public ResponseEntity<String> addUser(@Valid @RequestBody Users users) {
+        return Optional.ofNullable(users)
+                .map(u -> {
+                    userService.addUser(u);
+                    return ResponseEntity.ok("User added successfully");
+                })
+                .orElse(ResponseEntity.badRequest().body("Invalid user data"));
     }
 
     @GetMapping("/by-domain")
