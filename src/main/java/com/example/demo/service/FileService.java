@@ -2,29 +2,32 @@ package com.example.demo.service;
 
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FileService {
 
-    private static final String BASE_PATH = "files/";
+    private static final Path BASE_PATH = Paths.get("files");
 
     public FileService() {
-        File folder = new File(BASE_PATH);
-        if (!folder.exists()) {
-            folder.mkdirs();
+        try {
+            Files.createDirectories(BASE_PATH);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create files directory", e);
         }
     }
 
     public String createFile(String filename, String content) {
         try {
-            File file = new File(BASE_PATH + filename);
-            if (file.exists()) {
+            var filePath = BASE_PATH.resolve(filename);
+            if (Files.exists(filePath)) {
                 return "File already exists.";
             }
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(content);
-            writer.close();
+            Files.writeString(filePath, content, StandardOpenOption.CREATE_NEW);
             return "File created successfully.";
         } catch (IOException e) {
             return "Error creating file: " + e.getMessage();
@@ -33,32 +36,38 @@ public class FileService {
 
     public String readFile(String filename) {
         try {
-            File file = new File(BASE_PATH + filename);
-            if (!file.exists()) {
+            var filePath = BASE_PATH.resolve(filename);
+            if (!Files.exists(filePath)) {
                 return "File not found.";
             }
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            StringBuilder content = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
-            }
-            reader.close();
-            return content.toString();
+            return Files.readString(filePath);
         } catch (IOException e) {
             return "Error reading file: " + e.getMessage();
         }
     }
 
     public String deleteFile(String filename) {
-        File file = new File(BASE_PATH + filename);
-        if (!file.exists()) {
-            return "File not found.";
-        }
-        if (file.delete()) {
+        try {
+            var filePath = BASE_PATH.resolve(filename);
+            if (!Files.exists(filePath)) {
+                return "File not found.";
+            }
+            Files.delete(filePath);
             return "File deleted successfully.";
-        } else {
-            return "Error deleting file.";
+        } catch (IOException e) {
+            return "Error deleting file: " + e.getMessage();
+        }
+    }
+    
+    public List<String> listFiles() {
+        try {
+            return Files.list(BASE_PATH)
+                    .filter(Files::isRegularFile)
+                    .map(path -> path.getFileName().toString())
+                    .sorted()
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            return Collections.emptyList();
         }
     }
 }

@@ -8,8 +8,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/file")
 public class FileController {
 
-    @Autowired
-    private FileService fileService;
+    private final FileService fileService;
+
+    public FileController(FileService fileService) {
+        this.fileService = fileService;
+    }
 
     @PostMapping("/create")
     public String createFile(@RequestParam("filename") String filename,
@@ -25,5 +28,10 @@ public class FileController {
     @DeleteMapping("/delete")
     public String deleteFile(@RequestParam("filename") String filename) {
         return fileService.deleteFile(filename);
+    }
+    
+    @GetMapping("/list")
+    public java.util.List<String> listFiles() {
+        return fileService.listFiles();
     }
 }

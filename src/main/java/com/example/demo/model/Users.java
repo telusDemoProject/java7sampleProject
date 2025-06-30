@@ -1,13 +1,9 @@
 
 package com.example.demo.model;
 
-import org.hibernate.validator.constraints.Email;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import java.util.Objects;
 
 @Entity
 public class Users {
@@ -15,11 +11,13 @@ public class Users {
     @Id
     @GeneratedValue
     private Long id;
-    @NotNull
-    @Size(min = 2,max = 50, message = "Name must be between 2 and 50 characters")
+    
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
+    
     @Email
-    @NotNull
+    @NotBlank(message = "Email is required")
     private String email;
 
     public Users() {
@@ -53,5 +51,25 @@ public class Users {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        var users = (Users) o;
+        return Objects.equals(id, users.id) &&
+               Objects.equals(name, users.name) &&
+               Objects.equals(email, users.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Users{id=%d, name='%s', email='%s'}", id, name, email);
     }
 }
