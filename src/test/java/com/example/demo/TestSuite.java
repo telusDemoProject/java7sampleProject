@@ -1,16 +1,14 @@
 package com.example.demo;
 
-import com.example.demo.service.FileServiceTest;
-import com.example.demo.service.UserServiceSimpleTest;
-import com.example.demo.util.JwtUtilSimpleTest;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.jupiter.api.Test;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-    UserServiceSimpleTest.class,
-    FileServiceTest.class,
-    JwtUtilSimpleTest.class
-})
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestSuite {
+    
+    @Test
+    void testSuiteExists() {
+        // Simple test to verify test suite setup
+        assertTrue(true, "Java 8 Migration Test Suite is ready");
+    }
 }

@@ -3,6 +3,8 @@ package com.example.demo.service;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.nio.file.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FileService {
@@ -18,13 +20,11 @@ public class FileService {
 
     public String createFile(String filename, String content) {
         try {
-            File file = new File(BASE_PATH + filename);
-            if (file.exists()) {
+            Path filePath = Paths.get(BASE_PATH + filename);
+            if (Files.exists(filePath)) {
                 return "File already exists.";
             }
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(content);
-            writer.close();
+            Files.write(filePath, content.getBytes());
             return "File created successfully.";
         } catch (IOException e) {
             return "Error creating file: " + e.getMessage();
@@ -33,32 +33,27 @@ public class FileService {
 
     public String readFile(String filename) {
         try {
-            File file = new File(BASE_PATH + filename);
-            if (!file.exists()) {
+            Path filePath = Paths.get(BASE_PATH + filename);
+            if (!Files.exists(filePath)) {
                 return "File not found.";
             }
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            StringBuilder content = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
-            }
-            reader.close();
-            return content.toString();
+            return Files.lines(filePath)
+                    .collect(Collectors.joining("\n"));
         } catch (IOException e) {
             return "Error reading file: " + e.getMessage();
         }
     }
 
     public String deleteFile(String filename) {
-        File file = new File(BASE_PATH + filename);
-        if (!file.exists()) {
-            return "File not found.";
-        }
-        if (file.delete()) {
+        try {
+            Path filePath = Paths.get(BASE_PATH + filename);
+            if (!Files.exists(filePath)) {
+                return "File not found.";
+            }
+            Files.delete(filePath);
             return "File deleted successfully.";
-        } else {
-            return "Error deleting file.";
+        } catch (IOException e) {
+            return "Error deleting file: " + e.getMessage();
         }
     }
 }
