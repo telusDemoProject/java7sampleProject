@@ -2,106 +2,114 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Users;
 import com.example.demo.service.UserService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class UserControllerTest {
+@ExtendWith(MockitoExtension.class)
 
+class UserControllerTest {
+
+    @Mock
     private UserService userService;
+
+    @InjectMocks
     private UserController userController;
+
     private List<Users> testUsers;
 
-    @Before
-    public void setUp() {
-        userService = mock(UserService.class);
-        userController = new UserController();
-        // Use reflection to set the mock service
-        try {
-            java.lang.reflect.Field field = UserController.class.getDeclaredField("userService");
-            field.setAccessible(true);
-            field.set(userController, userService);
-        } catch (Exception e) {
-            // Handle reflection exception
-        }
-        
-        testUsers = Arrays.asList(
+    @BeforeEach
+    void setUp() {
+        testUsers = List.of(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com")
         );
     }
 
     @Test
-    public void testGetAllUsers() {
+    void shouldGetAllUsers() {
         when(userService.getAllUsers()).thenReturn(testUsers);
 
-        List<Users> result = userController.getAllUsers();
+        var result = userController.getAllUsers();
 
-        assertEquals(2, result.size());
-        assertEquals("John Doe", result.get(0).getName());
+        assertAll(
+            () -> assertEquals(2, result.size()),
+            () -> assertEquals("John Doe", result.get(0).getName())
+        );
         verify(userService).getAllUsers();
     }
 
     @Test
-    public void testAddUser() {
-        Users newUser = new Users(null, "Alice Brown", "alice@test.com");
+    void shouldAddUser() {
+        var newUser = new Users(null, "Alice Brown", "alice@test.com");
         
-        String result = userController.addUser(newUser);
+        var result = userController.addUser(newUser);
         
         assertEquals("Users added", result);
         verify(userService).addUser(newUser);
     }
 
     @Test
-    public void testGetUsersByDomain() {
-        List<Users> domainUsers = Arrays.asList(testUsers.get(0));
+    void shouldGetUsersByDomain() {
+        var domainUsers = List.of(testUsers.get(0));
         when(userService.getUsersByDomain("example.com")).thenReturn(domainUsers);
 
-        List<Users> result = userController.getUsersByDomain("example.com");
+        var result = userController.getUsersByDomain("example.com");
 
-        assertEquals(1, result.size());
-        assertEquals("john@example.com", result.get(0).getEmail());
+        assertAll(
+            () -> assertEquals(1, result.size()),
+            () -> assertEquals("john@example.com", result.get(0).getEmail())
+        );
         verify(userService).getUsersByDomain("example.com");
     }
 
     @Test
-    public void testGetSortedUsers() {
+    void shouldGetSortedUsers() {
         when(userService.sortUsersBy("name")).thenReturn(testUsers);
 
-        List<Users> result = userController.getSortedUsers("name");
+        var result = userController.getSortedUsers("name");
 
         assertEquals(2, result.size());
         verify(userService).sortUsersBy("name");
     }
 
     @Test
-    public void testGetGroupedByDomain() {
-        Map<String, List<Users>> groupedUsers = new HashMap<String, List<Users>>();
-        groupedUsers.put("example.com", Arrays.asList(testUsers.get(0)));
-        groupedUsers.put("test.com", Arrays.asList(testUsers.get(1)));
+    void shouldGetGroupedByDomain() {
+        var groupedUsers = Map.of(
+            "example.com", List.of(testUsers.get(0)),
+            "test.com", List.of(testUsers.get(1))
+        );
         
         when(userService.groupByEmailDomain()).thenReturn(groupedUsers);
 
-        Map<String, List<Users>> result = userController.getGroupedByDomain();
+        var result = userController.getGroupedByDomain();
 
-        assertEquals(2, result.size());
-        assertTrue(result.containsKey("example.com"));
+        assertAll(
+            () -> assertEquals(2, result.size()),
+            () -> assertTrue(result.containsKey("example.com"))
+        );
         verify(userService).groupByEmailDomain();
     }
 
     @Test
-    public void testSearchByName() {
-        List<Users> searchResults = Arrays.asList(testUsers.get(0));
+    void shouldSearchByName() {
+        var searchResults = List.of(testUsers.get(0));
         when(userService.searchUsersByName("john")).thenReturn(searchResults);
 
-        List<Users> result = userController.searchByName("john");
+        var result = userController.searchByName("john");
 
-        assertEquals(1, result.size());
-        assertEquals("John Doe", result.get(0).getName());
+        assertAll(
+            () -> assertEquals(1, result.size()),
+            () -> assertEquals("John Doe", result.get(0).getName())
+        );
         verify(userService).searchUsersByName("john");
     }
 }

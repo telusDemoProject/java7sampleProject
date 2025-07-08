@@ -1,12 +1,37 @@
-used on maven setup 3.9.9
+# Spring Boot Java 11 Project
 
+**Java Version:** 11  
+**Spring Boot Version:** 2.7.18  
+**Maven Version:** 3.9.9  
+**Testing Framework:** JUnit 5
 
-Commands to run local::
+## Java 11 Features Used
+- `var` keyword for local variable type inference
+- Stream API with modern collectors
+- Switch expressions
+- Files API for file operations
+- Modern JWT library (0.11.x)
+- Enhanced validation annotations
 
+## Commands to run locally:
+
+```bash
 mvn clean install
-java -jar jarname
+java -jar target/demo-0.0.1-SNAPSHOT.jar
+```
 
-springboot-java7-style project
+## Running Tests
+
+```bash
+# Run all tests
+mvn test
+
+# Run specific test class
+mvn test -Dtest=UserServiceTest
+
+# Run integration tests
+mvn test -Dtest=ApplicationIntegrationTest
+```
 
 
 ✅ 1. Create a User
