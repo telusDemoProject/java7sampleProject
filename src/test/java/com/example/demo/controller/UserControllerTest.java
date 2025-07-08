@@ -1,14 +1,21 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Users;
-import com.example.demo.service.UserService;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import com.example.demo.model.Users;
+import com.example.demo.service.UserService;
 
 public class UserControllerTest {
 
@@ -28,11 +35,10 @@ public class UserControllerTest {
         } catch (Exception e) {
             // Handle reflection exception
         }
-        
+
         testUsers = Arrays.asList(
-            new Users(1L, "John Doe", "john@example.com"),
-            new Users(2L, "Jane Smith", "jane@test.com")
-        );
+                new Users(1L, "John Doe", "john@example.com"),
+                new Users(2L, "Jane Smith", "jane@test.com"));
     }
 
     @Test
@@ -49,9 +55,9 @@ public class UserControllerTest {
     @Test
     public void testAddUser() {
         Users newUser = new Users(null, "Alice Brown", "alice@test.com");
-        
+
         String result = userController.addUser(newUser);
-        
+
         assertEquals("Users added", result);
         verify(userService).addUser(newUser);
     }
@@ -80,16 +86,13 @@ public class UserControllerTest {
 
     @Test
     public void testGetGroupedByDomain() {
-        Map<String, List<Users>> groupedUsers = new HashMap<String, List<Users>>();
+        Map<String, List<Users>> groupedUsers = new HashMap<>();
         groupedUsers.put("example.com", Arrays.asList(testUsers.get(0)));
         groupedUsers.put("test.com", Arrays.asList(testUsers.get(1)));
-        
         when(userService.groupByEmailDomain()).thenReturn(groupedUsers);
-
         Map<String, List<Users>> result = userController.getGroupedByDomain();
-
         assertEquals(2, result.size());
-        assertTrue(result.containsKey("example.com"));
+        assertTrue(result.keySet().stream().anyMatch(k -> k.equals("example.com")));
         verify(userService).groupByEmailDomain();
     }
 
