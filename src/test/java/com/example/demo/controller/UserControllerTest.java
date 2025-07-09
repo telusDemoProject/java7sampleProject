@@ -1,14 +1,21 @@
 package com.example.demo.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.example.demo.model.Users;
 import com.example.demo.service.UserService;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class UserControllerTest {
 
@@ -16,7 +23,7 @@ public class UserControllerTest {
     private UserController userController;
     private List<Users> testUsers;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         userService = mock(UserService.class);
         userController = new UserController();
@@ -28,11 +35,10 @@ public class UserControllerTest {
         } catch (Exception e) {
             // Handle reflection exception
         }
-        
+
         testUsers = Arrays.asList(
-            new Users(1L, "John Doe", "john@example.com"),
-            new Users(2L, "Jane Smith", "jane@test.com")
-        );
+                new Users(1L, "John Doe", "john@example.com"),
+                new Users(2L, "Jane Smith", "jane@test.com"));
     }
 
     @Test
@@ -49,9 +55,9 @@ public class UserControllerTest {
     @Test
     public void testAddUser() {
         Users newUser = new Users(null, "Alice Brown", "alice@test.com");
-        
+
         String result = userController.addUser(newUser);
-        
+
         assertEquals("Users added", result);
         verify(userService).addUser(newUser);
     }
@@ -83,7 +89,7 @@ public class UserControllerTest {
         Map<String, List<Users>> groupedUsers = new HashMap<String, List<Users>>();
         groupedUsers.put("example.com", Arrays.asList(testUsers.get(0)));
         groupedUsers.put("test.com", Arrays.asList(testUsers.get(1)));
-        
+
         when(userService.groupByEmailDomain()).thenReturn(groupedUsers);
 
         Map<String, List<Users>> result = userController.getGroupedByDomain();

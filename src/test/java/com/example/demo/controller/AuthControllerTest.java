@@ -1,13 +1,9 @@
 package com.example.demo.controller;
 
-import com.example.demo.util.JwtUtil;
-import org.junit.Test;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 public class AuthControllerTest {
 
@@ -18,10 +14,10 @@ public class AuthControllerTest {
         assertNotNull(controller);
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testAuthenticateWithNullDependencies() {
         // Test that controller fails gracefully with null dependencies
         AuthController controller = new AuthController();
-        controller.authenticate("user", "password");
+        assertThrows(NullPointerException.class, () -> controller.authenticate("user", "password"));
     }
 }

@@ -1,8 +1,12 @@
 package com.example.demo.util;
 
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
 
 public class JwtUtilSimpleTest {
 
@@ -16,7 +20,7 @@ public class JwtUtilSimpleTest {
     public void testGenerateTokenNotNull() {
         JwtUtil jwtUtil = new JwtUtil();
         String token = jwtUtil.generateToken("testuser");
-        
+
         assertNotNull(token);
         assertFalse(token.isEmpty());
         assertTrue(token.contains("."));
@@ -27,9 +31,9 @@ public class JwtUtilSimpleTest {
         JwtUtil jwtUtil = new JwtUtil();
         String username = "testuser";
         String token = jwtUtil.generateToken(username);
-        
+
         String extractedUsername = jwtUtil.extractUsername(token);
-        
+
         assertEquals(username, extractedUsername);
     }
 
@@ -37,9 +41,9 @@ public class JwtUtilSimpleTest {
     public void testTokenValidation() {
         JwtUtil jwtUtil = new JwtUtil();
         String token = jwtUtil.generateToken("testuser");
-        
+
         boolean isValid = jwtUtil.isTokenValid(token);
-        
+
         assertTrue(isValid);
     }
 
@@ -48,7 +52,7 @@ public class JwtUtilSimpleTest {
         JwtUtil jwtUtil = new JwtUtil();
         String token1 = jwtUtil.generateToken("user1");
         String token2 = jwtUtil.generateToken("user2");
-        
+
         assertNotEquals(token1, token2);
     }
 }
