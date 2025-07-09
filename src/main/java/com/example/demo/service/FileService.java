@@ -1,8 +1,13 @@
 package com.example.demo.service;
 
-import org.springframework.stereotype.Service;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
-import java.io.*;
+import org.springframework.stereotype.Service;
 
 @Service
 public class FileService {
@@ -22,9 +27,10 @@ public class FileService {
             if (file.exists()) {
                 return "File already exists.";
             }
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(content);
-            writer.close();
+            // Java 8 try-with-resources
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                writer.write(content);
+            }
             return "File created successfully.";
         } catch (IOException e) {
             return "Error creating file: " + e.getMessage();
@@ -37,14 +43,10 @@ public class FileService {
             if (!file.exists()) {
                 return "File not found.";
             }
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String line;
-            StringBuilder content = new StringBuilder();
-            while ((line = reader.readLine()) != null) {
-                content.append(line).append("\n");
+            // Java 8 try-with-resources and streams
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                return reader.lines().collect(java.util.stream.Collectors.joining("\n"));
             }
-            reader.close();
-            return content.toString();
         } catch (IOException e) {
             return "Error reading file: " + e.getMessage();
         }
