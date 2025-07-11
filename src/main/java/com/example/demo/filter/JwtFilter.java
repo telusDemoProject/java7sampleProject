@@ -8,40 +8,44 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
+    private final JwtUtil jwtUtil;
+
     @Autowired
-    private JwtUtil jwtUtil;
+    public JwtFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        String username = null;
-        String token = null;
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7);
-
-            username = jwtUtil.extractUsername(token);
-        }
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtUtil.isTokenValid(token)) {
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(username, null, null);
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
-        }
+        
+        Optional.ofNullable(request.getHeader("Authorization"))
+                .filter(header -> header.startsWith("Bearer "))
+                .map(header -> header.substring(7))
+                .ifPresent(token -> {
+                    try {
+                        String username = jwtUtil.extractUsername(token);
+                        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                            if (jwtUtil.isTokenValid(token)) {
+                                var authToken = new UsernamePasswordAuthenticationToken(username, null, null);
+                                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                                SecurityContextHolder.getContext().setAuthentication(authToken);
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Invalid token, continue without authentication
+                    }
+                });
 
         chain.doFilter(request, response);
     }

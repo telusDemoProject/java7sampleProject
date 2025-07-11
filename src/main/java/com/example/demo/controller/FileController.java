@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.*;
+import com.example.demo.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,8 +8,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/file")
 public class FileController {
 
+    private final FileService fileService;
+
     @Autowired
-    private FileService fileService;
+    public FileController(FileService fileService) {
+        this.fileService = fileService;
+    }
 
     @PostMapping("/create")
     public String createFile(@RequestParam("filename") String filename,

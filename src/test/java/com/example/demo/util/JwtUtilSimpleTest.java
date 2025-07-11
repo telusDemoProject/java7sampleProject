@@ -1,29 +1,36 @@
 package com.example.demo.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class JwtUtilSimpleTest {
+@DisplayName("JwtUtil Simple Tests")
+class JwtUtilSimpleTest {
 
     @Test
-    public void testJwtUtilCreation() {
+    @DisplayName("Should create JwtUtil instance")
+    void testJwtUtilCreation() {
         JwtUtil jwtUtil = new JwtUtil();
         assertNotNull(jwtUtil);
     }
 
     @Test
-    public void testGenerateTokenNotNull() {
+    @DisplayName("Should generate non-null token")
+    void testGenerateTokenNotNull() {
         JwtUtil jwtUtil = new JwtUtil();
         String token = jwtUtil.generateToken("testuser");
         
-        assertNotNull(token);
-        assertFalse(token.isEmpty());
-        assertTrue(token.contains("."));
+        assertAll(
+            () -> assertNotNull(token),
+            () -> assertFalse(token.isEmpty()),
+            () -> assertTrue(token.contains("."))
+        );
     }
 
     @Test
-    public void testExtractUsernameFromToken() {
+    @DisplayName("Should extract username from token")
+    void testExtractUsernameFromToken() {
         JwtUtil jwtUtil = new JwtUtil();
         String username = "testuser";
         String token = jwtUtil.generateToken(username);
@@ -34,17 +41,17 @@ public class JwtUtilSimpleTest {
     }
 
     @Test
-    public void testTokenValidation() {
+    @DisplayName("Should validate token")
+    void testTokenValidation() {
         JwtUtil jwtUtil = new JwtUtil();
         String token = jwtUtil.generateToken("testuser");
         
-        boolean isValid = jwtUtil.isTokenValid(token);
-        
-        assertTrue(isValid);
+        assertTrue(jwtUtil.isTokenValid(token));
     }
 
     @Test
-    public void testDifferentUsersGenerateDifferentTokens() {
+    @DisplayName("Should generate different tokens for different users")
+    void testDifferentUsersGenerateDifferentTokens() {
         JwtUtil jwtUtil = new JwtUtil();
         String token1 = jwtUtil.generateToken("user1");
         String token2 = jwtUtil.generateToken("user2");

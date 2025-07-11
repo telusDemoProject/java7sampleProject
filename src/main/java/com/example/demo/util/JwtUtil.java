@@ -1,23 +1,27 @@
 package com.example.demo.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "a9f8b7c6d5e4g3h2i1j0k9l8m7n6o5p4q3r2s1t0u9v8w7x6y5z4!@#";
+    private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
+            "a9f8b7c6d5e4g3h2i1j0k9l8m7n6o5p4q3r2s1t0u9v8w7x6y5z4!@#".getBytes());
 
     public String generateToken(String username) {
+        Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(username)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .subject(username)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plus(10, ChronoUnit.HOURS)))
+                .signWith(SECRET_KEY)
                 .compact();
     }
 
@@ -30,9 +34,11 @@ public class JwtUtil {
     }
 
     private Claims getClaims(String token) {
-        // get secret key
-        String secret = SECRET_KEY;
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .verifyWith(SECRET_KEY)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     private boolean isTokenExpired(String token) {

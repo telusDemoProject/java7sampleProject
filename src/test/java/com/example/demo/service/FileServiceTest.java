@@ -1,93 +1,114 @@
 package com.example.demo.service;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
-public class FileServiceTest {
+@DisplayName("FileService Tests")
+class FileServiceTest {
 
     private FileService fileService;
     private static final String TEST_FILENAME = "test-file.txt";
     private static final String TEST_CONTENT = "This is test content";
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         fileService = new FileService();
-        // Clean up any existing test file
-        File testFile = new File("files/" + TEST_FILENAME);
-        if (testFile.exists()) {
-            testFile.delete();
+        cleanupTestFile();
+    }
+
+    @AfterEach
+    void tearDown() {
+        cleanupTestFile();
+    }
+
+    private void cleanupTestFile() {
+        try {
+            Path testFile = Paths.get("files", TEST_FILENAME);
+            Files.deleteIfExists(testFile);
+        } catch (Exception e) {
+            // Ignore cleanup errors
         }
     }
 
-    @After
-    public void tearDown() {
-        // Clean up test file after each test
-        File testFile = new File("files/" + TEST_FILENAME);
-        if (testFile.exists()) {
-            testFile.delete();
+    @Nested
+    @DisplayName("File Creation")
+    class FileCreation {
+
+        @Test
+        @DisplayName("Should create file successfully")
+        void testCreateFile() {
+            String result = fileService.createFile(TEST_FILENAME, TEST_CONTENT);
+
+            assertEquals("File created successfully.", result);
+            assertTrue(Files.exists(Paths.get("files", TEST_FILENAME)));
+        }
+
+        @Test
+        @DisplayName("Should not create file if already exists")
+        void testCreateFileAlreadyExists() {
+            fileService.createFile(TEST_FILENAME, TEST_CONTENT);
+
+            String result = fileService.createFile(TEST_FILENAME, TEST_CONTENT);
+
+            assertEquals("File already exists.", result);
         }
     }
 
-    @Test
-    public void testCreateFile() {
-        String result = fileService.createFile(TEST_FILENAME, TEST_CONTENT);
-        
-        assertEquals("File created successfully.", result);
-        
-        File file = new File("files/" + TEST_FILENAME);
-        assertTrue(file.exists());
+    @Nested
+    @DisplayName("File Reading")
+    class FileReading {
+
+        @Test
+        @DisplayName("Should read file content")
+        void testReadFile() {
+            fileService.createFile(TEST_FILENAME, TEST_CONTENT);
+
+            String result = fileService.readFile(TEST_FILENAME);
+
+            assertEquals(TEST_CONTENT + "\n", result);
+        }
+
+        @Test
+        @DisplayName("Should return error for non-existent file")
+        void testReadFileNotFound() {
+            String result = fileService.readFile("nonexistent.txt");
+
+            assertEquals("File not found.", result);
+        }
     }
 
-    @Test
-    public void testCreateFileAlreadyExists() {
-        // Create file first
-        fileService.createFile(TEST_FILENAME, TEST_CONTENT);
-        
-        // Try to create same file again
-        String result = fileService.createFile(TEST_FILENAME, TEST_CONTENT);
-        
-        assertEquals("File already exists.", result);
-    }
+    @Nested
+    @DisplayName("File Deletion")
+    class FileDeletion {
 
-    @Test
-    public void testReadFile() {
-        // Create file first
-        fileService.createFile(TEST_FILENAME, TEST_CONTENT);
-        
-        String result = fileService.readFile(TEST_FILENAME);
-        
-        assertEquals(TEST_CONTENT + "\n", result);
-    }
+        @Test
+        @DisplayName("Should delete file successfully")
+        void testDeleteFile() {
+            fileService.createFile(TEST_FILENAME, TEST_CONTENT);
 
-    @Test
-    public void testReadFileNotFound() {
-        String result = fileService.readFile("nonexistent.txt");
-        
-        assertEquals("File not found.", result);
-    }
+            String result = fileService.deleteFile(TEST_FILENAME);
 
-    @Test
-    public void testDeleteFile() {
-        // Create file first
-        fileService.createFile(TEST_FILENAME, TEST_CONTENT);
-        
-        String result = fileService.deleteFile(TEST_FILENAME);
-        
-        assertEquals("File deleted successfully.", result);
-        
-        File file = new File("files/" + TEST_FILENAME);
-        assertFalse(file.exists());
-    }
+            assertEquals("File deleted successfully.", result);
+            assertFalse(Files.exists(Paths.get("files", TEST_FILENAME)));
+        }
 
-    @Test
-    public void testDeleteFileNotFound() {
-        String result = fileService.deleteFile("nonexistent.txt");
-        
-        assertEquals("File not found.", result);
+        @Test
+        @DisplayName("Should return error for non-existent file")
+        void testDeleteFileNotFound() {
+            String result = fileService.deleteFile("nonexistent.txt");
+
+            assertEquals("File not found.", result);
+        }
     }
 }
