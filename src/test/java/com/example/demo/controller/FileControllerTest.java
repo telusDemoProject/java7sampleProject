@@ -1,78 +1,64 @@
 package com.example.demo.controller;
 
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.example.demo.service.FileService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.http.MediaType;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 
-import com.example.demo.controller.FileController;
-import com.example.demo.service.FileService;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@SuppressWarnings("deprecation")
-@RunWith(org.mockito.runners.MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@DisplayName("FileController Tests")
 public class FileControllerTest {
-	
-	private MockMvc mockMvc;
-	
+    
     @Mock
     private FileService fileService;
     
     @InjectMocks
     private FileController fileController;
 
-	@Before
-	public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
-	}
-
-	@Test
-	public void testCreateFile() throws Exception {
+    @Test
+    @DisplayName("Should create file")
+    void shouldCreateFile() {
         String filename = "test.txt";
-        String expectedResponse = "File created";
-        when(fileService.createFile(filename, "Hello")).thenReturn("File created");
-        mockMvc.perform(MockMvcRequestBuilders.post("/file/create")
-                .param("filename", filename)
-                .param("content", "Hello")
-                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk())
-                .andExpect(content().string(expectedResponse));
+        String expectedResponse = "File created successfully.";
+        when(fileService.createFile(filename, "Hello")).thenReturn(expectedResponse);
+        
+        ResponseEntity<String> result = fileController.createFile(filename, "Hello");
+        
+        assertEquals(expectedResponse, result.getBody());
+        verify(fileService).createFile(filename, "Hello");
     }
 
-	@Test
-	public void testReadFile() throws Exception{
-        String filename="test.txt";
-        String expectedResponse ="Read success";
+    @Test
+    @DisplayName("Should read file")
+    void shouldReadFile() {
+        String filename = "test.txt";
+        String expectedResponse = "File content";
         when(fileService.readFile(filename)).thenReturn(expectedResponse);
-        mockMvc.perform(get("/file/read")
-                .param("filename", filename))
-                .andExpect(status().isOk())
-                .andExpect(content().string(expectedResponse));
+        
+        ResponseEntity<String> result = fileController.readFile(filename);
+        
+        assertEquals(expectedResponse, result.getBody());
+        verify(fileService).readFile(filename);
     }
 
-	@Test
-	public void testDeleteFile() throws Exception{
-        String filename="test.txt";
-        String expectedResult="File deleted successfully";
-        when(fileService.deleteFile(filename)).thenReturn("File deleted successfully");
-        mockMvc.perform(delete("/file/delete")
-            .param("filename", filename))
-        .andExpect(status().isOk())
-        .andExpect(content().string(expectedResult));
+    @Test
+    @DisplayName("Should delete file")
+    void shouldDeleteFile() {
+        String filename = "test.txt";
+        String expectedResult = "File deleted successfully.";
+        when(fileService.deleteFile(filename)).thenReturn(expectedResult);
+        
+        ResponseEntity<String> result = fileController.deleteFile(filename);
+        
+        assertEquals(expectedResult, result.getBody());
+        verify(fileService).deleteFile(filename);
     }
 }

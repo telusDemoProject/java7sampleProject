@@ -3,47 +3,52 @@ package com.example.demo.controller;
 
 import com.example.demo.service.UserService;
 import com.example.demo.model.Users;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.*;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
+    private final UserService userService;
+
     @Autowired
-    private UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
-    public List<Users> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<Users>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @PostMapping
-    public String addUser(@Valid @RequestBody Users users) {
+    public ResponseEntity<String> addUser(@Valid @RequestBody Users users) {
         userService.addUser(users);
-        return "Users added";
+        return ResponseEntity.ok("Users added");
     }
 
     @GetMapping("/by-domain")
-    public List<Users> getUsersByDomain(@RequestParam String domain) {
-        return userService.getUsersByDomain(domain);
+    public ResponseEntity<List<Users>> getUsersByDomain(@RequestParam String domain) {
+        return ResponseEntity.ok(userService.getUsersByDomain(domain));
     }
 
     @GetMapping("/sorted")
-    public List<Users> getSortedUsers(@RequestParam(defaultValue = "name") String field) {
-        return userService.sortUsersBy(field);
+    public ResponseEntity<List<Users>> getSortedUsers(@RequestParam(defaultValue = "name") String field) {
+        return ResponseEntity.ok(userService.sortUsersBy(field));
     }
 
     @GetMapping("/grouped-by-domain")
-    public Map<String, List<Users>> getGroupedByDomain() {
-        return userService.groupByEmailDomain();
+    public ResponseEntity<Map<String, List<Users>>> getGroupedByDomain() {
+        return ResponseEntity.ok(userService.groupByEmailDomain());
     }
 
     @GetMapping("/search")
-    public List<Users> searchByName(@RequestParam String keyword) {
-        return userService.searchUsersByName(keyword);
+    public ResponseEntity<List<Users>> searchByName(@RequestParam String keyword) {
+        return ResponseEntity.ok(userService.searchUsersByName(keyword));
     }
 }

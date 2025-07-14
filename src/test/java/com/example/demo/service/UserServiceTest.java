@@ -2,131 +2,164 @@ package com.example.demo.service;
 
 import com.example.demo.model.Users;
 import com.example.demo.repository.UserRepository;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@DisplayName("UserService Tests")
 
 public class UserServiceTest {
 
+    @Mock
     private UserRepository userRepository;
+    
+    @InjectMocks
     private UserService userService;
+    
     private List<Users> testUsers;
 
-    @Before
-    public void setUp() {
-        userRepository = mock(UserRepository.class);
-        userService = new UserService();
-        // Use reflection to set the mock repository
-        try {
-            java.lang.reflect.Field field = UserService.class.getDeclaredField("userRepository");
-            field.setAccessible(true);
-            field.set(userService, userRepository);
-        } catch (Exception e) {
-            // Handle reflection exception
-        }
-        
-        testUsers = Arrays.asList(
+    @BeforeEach
+    void setUp() {
+        testUsers = List.of(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com"),
             new Users(3L, "Bob Johnson", "bob@example.com")
         );
     }
 
-    @Test
-    public void testGetAllUsers() {
-        when(userRepository.findAll()).thenReturn(testUsers);
+    @Nested
+    @DisplayName("Basic Operations")
+    class BasicOperations {
         
-        List<Users> result = userService.getAllUsers();
-        
-        assertEquals(3, result.size());
-        verify(userRepository).findAll();
+        @Test
+        @DisplayName("Should return all users")
+        void shouldReturnAllUsers() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            List<Users> result = userService.getAllUsers();
+            
+            assertEquals(3, result.size());
+            verify(userRepository).findAll();
+        }
+
+        @Test
+        @DisplayName("Should add user successfully")
+        void shouldAddUser() {
+            Users newUser = new Users(4L, "Alice Brown", "alice@test.com");
+            
+            userService.addUser(newUser);
+            
+            verify(userRepository).save(newUser);
+        }
     }
 
-    @Test
-    public void testAddUser() {
-        Users newUser = new Users(4L, "Alice Brown", "alice@test.com");
+    @Nested
+    @DisplayName("Domain Operations")
+    class DomainOperations {
         
-        userService.addUser(newUser);
-        
-        verify(userRepository).save(newUser);
+        @Test
+        @DisplayName("Should filter users by domain")
+        void shouldFilterUsersByDomain() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            List<Users> result = userService.getUsersByDomain("example.com");
+            
+            assertEquals(2, result.size());
+            assertTrue(result.stream().allMatch(u -> u.getEmail().endsWith("@example.com")));
+        }
+
+        @Test
+        @DisplayName("Should return empty list for non-existent domain")
+        void shouldReturnEmptyForNonExistentDomain() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            List<Users> result = userService.getUsersByDomain("nonexistent.com");
+            
+            assertTrue(result.isEmpty());
+        }
     }
 
-    @Test
-    public void testGetUsersByDomain() {
-        when(userRepository.findAll()).thenReturn(testUsers);
+    @Nested
+    @DisplayName("Sorting Operations")
+    class SortingOperations {
         
-        List<Users> result = userService.getUsersByDomain("example.com");
-        
-        assertEquals(2, result.size());
-        assertEquals("john@example.com", result.get(0).getEmail());
-        assertEquals("bob@example.com", result.get(1).getEmail());
+        @Test
+        @DisplayName("Should sort users by name")
+        void shouldSortUsersByName() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            List<Users> result = userService.sortUsersBy("name");
+            
+            assertEquals("Bob Johnson", result.get(0).getName());
+            assertEquals("Jane Smith", result.get(1).getName());
+            assertEquals("John Doe", result.get(2).getName());
+        }
+
+        @Test
+        @DisplayName("Should sort users by email")
+        void shouldSortUsersByEmail() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            List<Users> result = userService.sortUsersBy("email");
+            
+            assertEquals("bob@example.com", result.get(0).getEmail());
+            assertEquals("jane@test.com", result.get(1).getEmail());
+            assertEquals("john@example.com", result.get(2).getEmail());
+        }
     }
 
-    @Test
-    public void testGetUsersByDomainNoMatch() {
-        when(userRepository.findAll()).thenReturn(testUsers);
+    @Nested
+    @DisplayName("Advanced Operations")
+    class AdvancedOperations {
         
-        List<Users> result = userService.getUsersByDomain("nonexistent.com");
-        
-        assertEquals(0, result.size());
-    }
+        @Test
+        @DisplayName("Should group users by email domain")
+        void shouldGroupUsersByEmailDomain() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            Map<String, List<Users>> result = userService.groupByEmailDomain();
+            
+            assertEquals(2, result.size());
+            assertAll(
+                () -> assertTrue(result.containsKey("example.com")),
+                () -> assertTrue(result.containsKey("test.com")),
+                () -> assertEquals(2, result.get("example.com").size()),
+                () -> assertEquals(1, result.get("test.com").size())
+            );
+        }
 
-    @Test
-    public void testSortUsersByName() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.sortUsersBy("name");
-        
-        assertEquals("Bob Johnson", result.get(0).getName());
-        assertEquals("Jane Smith", result.get(1).getName());
-        assertEquals("John Doe", result.get(2).getName());
-    }
+        @Test
+        @DisplayName("Should search users by name")
+        void shouldSearchUsersByName() {
+            when(userRepository.findByNameContainingIgnoreCase("john")).thenReturn(
+                testUsers.stream().filter(u -> u.getName().toLowerCase().contains("john")).toList()
+            );
+            
+            List<Users> result = userService.searchUsersByName("john");
+            
+            assertEquals(2, result.size());
+            assertTrue(result.stream().allMatch(u -> u.getName().toLowerCase().contains("john")));
+        }
 
-    @Test
-    public void testSortUsersByEmail() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.sortUsersBy("email");
-        
-        assertEquals("bob@example.com", result.get(0).getEmail());
-        assertEquals("jane@test.com", result.get(1).getEmail());
-        assertEquals("john@example.com", result.get(2).getEmail());
-    }
-
-    @Test
-    public void testGroupByEmailDomain() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        Map<String, List<Users>> result = userService.groupByEmailDomain();
-        
-        assertEquals(2, result.size());
-        assertTrue(result.containsKey("example.com"));
-        assertTrue(result.containsKey("test.com"));
-        assertEquals(2, result.get("example.com").size());
-        assertEquals(1, result.get("test.com").size());
-    }
-
-    @Test
-    public void testSearchUsersByName() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.searchUsersByName("john");
-        
-        assertEquals(2, result.size());
-        assertTrue(result.get(0).getName().toLowerCase().contains("john"));
-        assertTrue(result.get(1).getName().toLowerCase().contains("john"));
-    }
-
-    @Test
-    public void testSearchUsersByNameNoMatch() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.searchUsersByName("xyz");
-        
-        assertEquals(0, result.size());
+        @Test
+        @DisplayName("Should return empty list when no name matches")
+        void shouldReturnEmptyWhenNoNameMatches() {
+            when(userRepository.findByNameContainingIgnoreCase("xyz")).thenReturn(List.of());
+            
+            List<Users> result = userService.searchUsersByName("xyz");
+            
+            assertTrue(result.isEmpty());
+        }
     }
 }
