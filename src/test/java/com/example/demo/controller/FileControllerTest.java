@@ -24,7 +24,7 @@ import com.example.demo.controller.FileController;
 import com.example.demo.service.FileService;
 
 @SuppressWarnings("deprecation")
-@RunWith(org.mockito.runners.MockitoJUnitRunner.class)
+@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class FileControllerTest {
 	
 	private MockMvc mockMvc;

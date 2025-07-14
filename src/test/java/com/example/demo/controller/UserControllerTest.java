@@ -19,15 +19,7 @@ public class UserControllerTest {
     @Before
     public void setUp() {
         userService = mock(UserService.class);
-        userController = new UserController();
-        // Use reflection to set the mock service
-        try {
-            java.lang.reflect.Field field = UserController.class.getDeclaredField("userService");
-            field.setAccessible(true);
-            field.set(userController, userService);
-        } catch (Exception e) {
-            // Handle reflection exception
-        }
+        userController = new UserController(userService);
         
         testUsers = Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),

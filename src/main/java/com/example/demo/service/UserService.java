@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -18,68 +20,59 @@ public class UserService {
         return userRepository.findAll();
     }
 
-
     public void addUser(Users users) {
         userRepository.save(users);
     }
 
-
     public List<Users> getUsersByDomain(String domain) {
-        List<Users> result = new ArrayList<Users>();
-        List<Users> all = userRepository.findAll();
-        for (int i = 0; i < all.size(); i++) {
-            Users u = all.get(i);
-            if (u.getEmail() != null && u.getEmail().endsWith("@" + domain)) {
-                result.add(u);
-            }
-        }
-        return result;
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> Optional.ofNullable(user.getEmail())
+                        .map(email -> email.endsWith("@" + domain))
+                        .orElse(false))
+                .collect(Collectors.toList());
     }
 
-    public List<Users> sortUsersBy(final String field) {
-        List<Users> users = userRepository.findAll();
-        Collections.sort(users, new Comparator<Users>() {
-            public int compare(Users u1, Users u2) {
-                if ("name".equals(field)) {
-                    return u1.getName().compareTo(u2.getName());
-                } else if ("email".equals(field)) {
-                    return u1.getEmail().compareTo(u2.getEmail());
-                }
-                return 0;
-            }
-        });
-        return users;
+    public List<Users> sortUsersBy(String field) {
+        return userRepository.findAll()
+                .stream()
+                .sorted(getComparator(field))
+                .collect(Collectors.toList());
+    }
+
+    private Comparator<Users> getComparator(String field) {
+        return switch (field) {
+            case "name" -> Comparator.comparing(Users::getName, Comparator.nullsLast(String::compareTo));
+            case "email" -> Comparator.comparing(Users::getEmail, Comparator.nullsLast(String::compareTo));
+            default -> Comparator.comparing(Users::getId, Comparator.nullsLast(Long::compareTo));
+        };
     }
 
     public Map<String, List<Users>> groupByEmailDomain() {
-        Map<String, List<Users>> map = new HashMap<String, List<Users>>();
-        List<Users> users = userRepository.findAll();
-        for (int i = 0; i < users.size(); i++) {
-            Users u = users.get(i);
-            String email = u.getEmail();
-            if (email != null) {
-                String[] parts = email.split("@");
-                if (parts.length == 2) {
-                    String domain = parts[1];
-                    if (!map.containsKey(domain)) {
-                        map.put(domain, new ArrayList<Users>());
-                    }
-                    map.get(domain).add(u);
-                }
-            }
-        }
-        return map;
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> Optional.ofNullable(user.getEmail()).isPresent())
+                .collect(Collectors.groupingBy(
+                        user -> extractDomain(user.getEmail()),
+                        Collectors.toList()
+                ));
+    }
+
+    private String extractDomain(String email) {
+        return Optional.ofNullable(email)
+                .map(e -> e.split("@"))
+                .filter(parts -> parts.length == 2)
+                .map(parts -> parts[1])
+                .orElse("unknown");
     }
 
     public List<Users> searchUsersByName(String keyword) {
-        List<Users> result = new ArrayList<Users>();
-        List<Users> users = userRepository.findAll();
-        for (int i = 0; i < users.size(); i++) {
-            Users u = users.get(i);
-            if (u.getName() != null && u.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                result.add(u);
-            }
-        }
-        return result;
+        String lowerKeyword = keyword.toLowerCase();
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> Optional.ofNullable(user.getName())
+                        .map(name -> name.toLowerCase().contains(lowerKeyword))
+                        .orElse(false))
+                .collect(Collectors.toList());
     }
 }
