@@ -1,15 +1,14 @@
 package com.example.demo.util;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class JwtUtilSimpleTest {
 
     @Test
     public void testJwtUtilCreation() {
         JwtUtil jwtUtil = new JwtUtil();
-        assertNotNull(jwtUtil);
+        assertThat(jwtUtil).isNotNull();
     }
 
     @Test
@@ -17,9 +16,7 @@ public class JwtUtilSimpleTest {
         JwtUtil jwtUtil = new JwtUtil();
         String token = jwtUtil.generateToken("testuser");
         
-        assertNotNull(token);
-        assertFalse(token.isEmpty());
-        assertTrue(token.contains("."));
+        assertThat(token).isNotNull().isNotEmpty().contains(".");
     }
 
     @Test
@@ -30,7 +27,7 @@ public class JwtUtilSimpleTest {
         
         String extractedUsername = jwtUtil.extractUsername(token);
         
-        assertEquals(username, extractedUsername);
+        assertThat(extractedUsername).isEqualTo(username);
     }
 
     @Test
@@ -40,7 +37,7 @@ public class JwtUtilSimpleTest {
         
         boolean isValid = jwtUtil.isTokenValid(token);
         
-        assertTrue(isValid);
+        assertThat(isValid).isTrue();
     }
 
     @Test
@@ -49,6 +46,6 @@ public class JwtUtilSimpleTest {
         String token1 = jwtUtil.generateToken("user1");
         String token2 = jwtUtil.generateToken("user2");
         
-        assertNotEquals(token1, token2);
+        assertThat(token1).isNotEqualTo(token2);
     }
 }

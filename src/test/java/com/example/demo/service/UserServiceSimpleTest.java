@@ -1,108 +1,73 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Users;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class UserServiceSimpleTest {
 
     @Test
     public void testGetUsersByDomainLogic() {
-        List<Users> users = Arrays.asList(
+        java.util.List<Users> users = java.util.Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com"),
             new Users(3L, "Bob Johnson", "bob@example.com")
         );
-        
-        List<Users> result = new ArrayList<Users>();
-        String domain = "example.com";
-        
-        for (int i = 0; i < users.size(); i++) {
-            Users u = users.get(i);
-            if (u.getEmail() != null && u.getEmail().endsWith("@" + domain)) {
-                result.add(u);
-            }
-        }
-        
-        assertEquals(2, result.size());
-        assertEquals("john@example.com", result.get(0).getEmail());
-        assertEquals("bob@example.com", result.get(1).getEmail());
+        java.util.List<Users> result = users.stream()
+            .filter(u -> u.getEmail() != null && u.getEmail().endsWith("@example.com"))
+            .toList();
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getEmail()).isEqualTo("john@example.com");
+        assertThat(result.get(1).getEmail()).isEqualTo("bob@example.com");
     }
 
     @Test
     public void testSortUsersByNameLogic() {
-        List<Users> users = Arrays.asList(
+        java.util.List<Users> users = java.util.Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Alice Smith", "alice@test.com"),
             new Users(3L, "Bob Johnson", "bob@example.com")
         );
-        
-        Collections.sort(users, new Comparator<Users>() {
-            public int compare(Users u1, Users u2) {
-                return u1.getName().compareTo(u2.getName());
-            }
-        });
-        
-        assertEquals("Alice Smith", users.get(0).getName());
-        assertEquals("Bob Johnson", users.get(1).getName());
-        assertEquals("John Doe", users.get(2).getName());
+        java.util.List<Users> sorted = users.stream()
+            .sorted(java.util.Comparator.comparing(Users::getName))
+            .toList();
+        assertThat(sorted.get(0).getName()).isEqualTo("Alice Smith");
+        assertThat(sorted.get(1).getName()).isEqualTo("Bob Johnson");
+        assertThat(sorted.get(2).getName()).isEqualTo("John Doe");
     }
 
     @Test
     public void testGroupByEmailDomainLogic() {
-        List<Users> users = Arrays.asList(
+        java.util.List<Users> users = java.util.Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com"),
             new Users(3L, "Bob Johnson", "bob@example.com")
         );
-        
-        Map<String, List<Users>> map = new HashMap<String, List<Users>>();
-        
-        for (int i = 0; i < users.size(); i++) {
-            Users u = users.get(i);
-            String email = u.getEmail();
-            if (email != null) {
-                String[] parts = email.split("@");
-                if (parts.length == 2) {
-                    String domain = parts[1];
-                    if (!map.containsKey(domain)) {
-                        map.put(domain, new ArrayList<Users>());
-                    }
-                    map.get(domain).add(u);
-                }
-            }
-        }
-        
-        assertEquals(2, map.size());
-        assertTrue(map.containsKey("example.com"));
-        assertTrue(map.containsKey("test.com"));
-        assertEquals(2, map.get("example.com").size());
-        assertEquals(1, map.get("test.com").size());
+        java.util.Map<String, java.util.List<Users>> map = users.stream()
+            .filter(u -> u.getEmail() != null && u.getEmail().contains("@"))
+            .collect(java.util.stream.Collectors.groupingBy(u -> u.getEmail().split("@")[1]));
+        assertThat(map).hasSize(2);
+        assertThat(map).containsKeys("example.com", "test.com");
+        assertThat(map.get("example.com")).hasSize(2);
+        assertThat(map.get("test.com")).hasSize(1);
     }
 
     @Test
     public void testSearchUsersByNameLogic() {
-        List<Users> users = Arrays.asList(
+        java.util.List<Users> users = java.util.Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com"),
             new Users(3L, "Bob Johnson", "bob@example.com")
         );
-        
         String keyword = "john";
-        List<Users> result = new ArrayList<Users>();
-        
-        for (int i = 0; i < users.size(); i++) {
-            Users u = users.get(i);
-            if (u.getName() != null && u.getName().toLowerCase().contains(keyword.toLowerCase())) {
-                result.add(u);
-            }
-        }
-        
-        assertEquals(2, result.size());
-        assertTrue(result.get(0).getName().toLowerCase().contains("john"));
-        assertTrue(result.get(1).getName().toLowerCase().contains("john"));
+        java.util.List<Users> result = users.stream()
+            .filter(u -> u.getName() != null && u.getName().toLowerCase().contains(keyword.toLowerCase()))
+            .toList();
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getName().toLowerCase()).contains("john");
+        assertThat(result.get(1).getName().toLowerCase()).contains("john");
     }
 }

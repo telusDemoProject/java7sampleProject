@@ -2,13 +2,11 @@ package com.example.demo.service;
 
 import com.example.demo.model.Users;
 import com.example.demo.repository.UserRepository;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class UserServiceTest {
 
@@ -16,7 +14,7 @@ public class UserServiceTest {
     private UserService userService;
     private List<Users> testUsers;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         userRepository = mock(UserRepository.class);
         userService = new UserService();
@@ -39,94 +37,75 @@ public class UserServiceTest {
     @Test
     public void testGetAllUsers() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.getAllUsers();
-        
-        assertEquals(3, result.size());
+        java.util.List<Users> result = userService.getAllUsers();
+        assertThat(result).hasSize(3);
         verify(userRepository).findAll();
     }
 
     @Test
     public void testAddUser() {
         Users newUser = new Users(4L, "Alice Brown", "alice@test.com");
-        
         userService.addUser(newUser);
-        
         verify(userRepository).save(newUser);
     }
 
     @Test
     public void testGetUsersByDomain() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.getUsersByDomain("example.com");
-        
-        assertEquals(2, result.size());
-        assertEquals("john@example.com", result.get(0).getEmail());
-        assertEquals("bob@example.com", result.get(1).getEmail());
+        java.util.List<Users> result = userService.getUsersByDomain("example.com");
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getEmail()).isEqualTo("john@example.com");
+        assertThat(result.get(1).getEmail()).isEqualTo("bob@example.com");
     }
 
     @Test
     public void testGetUsersByDomainNoMatch() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.getUsersByDomain("nonexistent.com");
-        
-        assertEquals(0, result.size());
+        java.util.List<Users> result = userService.getUsersByDomain("nonexistent.com");
+        assertThat(result).isEmpty();
     }
 
     @Test
     public void testSortUsersByName() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.sortUsersBy("name");
-        
-        assertEquals("Bob Johnson", result.get(0).getName());
-        assertEquals("Jane Smith", result.get(1).getName());
-        assertEquals("John Doe", result.get(2).getName());
+        java.util.List<Users> result = userService.sortUsersBy("name");
+        assertThat(result.get(0).getName()).isEqualTo("Bob Johnson");
+        assertThat(result.get(1).getName()).isEqualTo("Jane Smith");
+        assertThat(result.get(2).getName()).isEqualTo("John Doe");
     }
 
     @Test
     public void testSortUsersByEmail() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.sortUsersBy("email");
-        
-        assertEquals("bob@example.com", result.get(0).getEmail());
-        assertEquals("jane@test.com", result.get(1).getEmail());
-        assertEquals("john@example.com", result.get(2).getEmail());
+        java.util.List<Users> result = userService.sortUsersBy("email");
+        assertThat(result.get(0).getEmail()).isEqualTo("bob@example.com");
+        assertThat(result.get(1).getEmail()).isEqualTo("jane@test.com");
+        assertThat(result.get(2).getEmail()).isEqualTo("john@example.com");
     }
 
     @Test
     public void testGroupByEmailDomain() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        Map<String, List<Users>> result = userService.groupByEmailDomain();
-        
-        assertEquals(2, result.size());
-        assertTrue(result.containsKey("example.com"));
-        assertTrue(result.containsKey("test.com"));
-        assertEquals(2, result.get("example.com").size());
-        assertEquals(1, result.get("test.com").size());
+        java.util.Map<String, java.util.List<Users>> result = userService.groupByEmailDomain();
+        assertThat(result).hasSize(2);
+        assertThat(result).containsKeys("example.com", "test.com");
+        assertThat(result.get("example.com")).hasSize(2);
+        assertThat(result.get("test.com")).hasSize(1);
     }
 
     @Test
     public void testSearchUsersByName() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.searchUsersByName("john");
-        
-        assertEquals(2, result.size());
-        assertTrue(result.get(0).getName().toLowerCase().contains("john"));
-        assertTrue(result.get(1).getName().toLowerCase().contains("john"));
+        java.util.List<Users> result = userService.searchUsersByName("john");
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getName().toLowerCase()).contains("john");
+        assertThat(result.get(1).getName().toLowerCase()).contains("john");
     }
 
     @Test
     public void testSearchUsersByNameNoMatch() {
         when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.searchUsersByName("xyz");
-        
-        assertEquals(0, result.size());
+        java.util.List<Users> result = userService.searchUsersByName("xyz");
+        assertThat(result).isEmpty();
     }
 }

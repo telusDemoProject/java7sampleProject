@@ -1,27 +1,26 @@
 package com.example.demo.controller;
 
 import com.example.demo.util.JwtUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+import static org.assertj.core.api.Assertions.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import static org.junit.Assert.*;
 
 public class AuthControllerTest {
 
     @Test
     public void testAuthControllerExists() {
-        // Simple test to verify AuthController can be instantiated
         AuthController controller = new AuthController();
-        assertNotNull(controller);
+        assertThat(controller).isNotNull();
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testAuthenticateWithNullDependencies() {
-        // Test that controller fails gracefully with null dependencies
         AuthController controller = new AuthController();
-        controller.authenticate("user", "password");
+        assertThatThrownBy(() -> controller.authenticate("user", "password"))
+            .isInstanceOf(NullPointerException.class);
     }
 }

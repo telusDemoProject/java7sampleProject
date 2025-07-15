@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.*;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/users")
@@ -45,5 +46,12 @@ public class UserController {
     @GetMapping("/search")
     public List<Users> searchByName(@RequestParam String keyword) {
         return userService.searchUsersByName(keyword);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Users> getUserById(@PathVariable Long id) {
+        return userService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

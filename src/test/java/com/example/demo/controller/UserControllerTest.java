@@ -2,13 +2,11 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Users;
 import com.example.demo.service.UserService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 public class UserControllerTest {
 
@@ -16,20 +14,16 @@ public class UserControllerTest {
     private UserController userController;
     private List<Users> testUsers;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         userService = mock(UserService.class);
         userController = new UserController();
-        // Use reflection to set the mock service
         try {
             java.lang.reflect.Field field = UserController.class.getDeclaredField("userService");
             field.setAccessible(true);
             field.set(userController, userService);
-        } catch (Exception e) {
-            // Handle reflection exception
-        }
-        
-        testUsers = Arrays.asList(
+        } catch (Exception e) {}
+        testUsers = java.util.Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com")
         );
@@ -38,70 +32,57 @@ public class UserControllerTest {
     @Test
     public void testGetAllUsers() {
         when(userService.getAllUsers()).thenReturn(testUsers);
-
-        List<Users> result = userController.getAllUsers();
-
-        assertEquals(2, result.size());
-        assertEquals("John Doe", result.get(0).getName());
+        java.util.List<Users> result = userController.getAllUsers();
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getName()).isEqualTo("John Doe");
         verify(userService).getAllUsers();
     }
 
     @Test
     public void testAddUser() {
         Users newUser = new Users(null, "Alice Brown", "alice@test.com");
-        
         String result = userController.addUser(newUser);
-        
-        assertEquals("Users added", result);
+        assertThat(result).isEqualTo("Users added");
         verify(userService).addUser(newUser);
     }
 
     @Test
     public void testGetUsersByDomain() {
-        List<Users> domainUsers = Arrays.asList(testUsers.get(0));
+        java.util.List<Users> domainUsers = java.util.Arrays.asList(testUsers.get(0));
         when(userService.getUsersByDomain("example.com")).thenReturn(domainUsers);
-
-        List<Users> result = userController.getUsersByDomain("example.com");
-
-        assertEquals(1, result.size());
-        assertEquals("john@example.com", result.get(0).getEmail());
+        java.util.List<Users> result = userController.getUsersByDomain("example.com");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getEmail()).isEqualTo("john@example.com");
         verify(userService).getUsersByDomain("example.com");
     }
 
     @Test
     public void testGetSortedUsers() {
         when(userService.sortUsersBy("name")).thenReturn(testUsers);
-
-        List<Users> result = userController.getSortedUsers("name");
-
-        assertEquals(2, result.size());
+        java.util.List<Users> result = userController.getSortedUsers("name");
+        assertThat(result).hasSize(2);
         verify(userService).sortUsersBy("name");
     }
 
     @Test
     public void testGetGroupedByDomain() {
-        Map<String, List<Users>> groupedUsers = new HashMap<String, List<Users>>();
-        groupedUsers.put("example.com", Arrays.asList(testUsers.get(0)));
-        groupedUsers.put("test.com", Arrays.asList(testUsers.get(1)));
-        
+        java.util.Map<String, java.util.List<Users>> groupedUsers = new java.util.HashMap<>();
+        groupedUsers.put("example.com", java.util.Arrays.asList(testUsers.get(0)));
+        groupedUsers.put("test.com", java.util.Arrays.asList(testUsers.get(1)));
         when(userService.groupByEmailDomain()).thenReturn(groupedUsers);
-
-        Map<String, List<Users>> result = userController.getGroupedByDomain();
-
-        assertEquals(2, result.size());
-        assertTrue(result.containsKey("example.com"));
+        java.util.Map<String, java.util.List<Users>> result = userController.getGroupedByDomain();
+        assertThat(result).hasSize(2);
+        assertThat(result).containsKeys("example.com", "test.com");
         verify(userService).groupByEmailDomain();
     }
 
     @Test
     public void testSearchByName() {
-        List<Users> searchResults = Arrays.asList(testUsers.get(0));
+        java.util.List<Users> searchResults = java.util.Arrays.asList(testUsers.get(0));
         when(userService.searchUsersByName("john")).thenReturn(searchResults);
-
-        List<Users> result = userController.searchByName("john");
-
-        assertEquals(1, result.size());
-        assertEquals("John Doe", result.get(0).getName());
+        java.util.List<Users> result = userController.searchByName("john");
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("John Doe");
         verify(userService).searchUsersByName("john");
     }
 }
