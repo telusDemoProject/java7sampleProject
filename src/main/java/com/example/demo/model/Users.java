@@ -1,29 +1,28 @@
-
 package com.example.demo.model;
 
 import org.hibernate.validator.constraints.Email;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Users {
-
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotNull
-    @Size(min = 2,max = 50, message = "Name must be between 2 and 50 characters")
+    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
     private String name;
+
     @Email
     @NotNull
     private String email;
 
-    public Users() {
-    }
+    public Users() {}
 
     public Users(Long id, String name, String email) {
         this.id = id;

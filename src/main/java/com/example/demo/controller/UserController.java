@@ -1,4 +1,3 @@
-
 package com.example.demo.controller;
 
 import com.example.demo.service.UserService;
@@ -6,7 +5,7 @@ import com.example.demo.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.*;
 
 @RestController

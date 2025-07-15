@@ -3,11 +3,13 @@ package com.example.demo;
 import com.example.demo.service.FileServiceTest;
 import com.example.demo.service.UserServiceSimpleTest;
 import com.example.demo.util.JwtUtilSimpleTest;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
     UserServiceSimpleTest.class,
     FileServiceTest.class,
     JwtUtilSimpleTest.class
