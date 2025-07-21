@@ -2,33 +2,31 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Users;
 import com.example.demo.service.UserService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
 
+    @Mock
     private UserService userService;
+    @InjectMocks
     private UserController userController;
     private List<Users> testUsers;
 
-    @Before
-    public void setUp() {
-        userService = mock(UserService.class);
-        userController = new UserController();
-        // Use reflection to set the mock service
-        try {
-            java.lang.reflect.Field field = UserController.class.getDeclaredField("userService");
-            field.setAccessible(true);
-            field.set(userController, userService);
-        } catch (Exception e) {
-            // Handle reflection exception
-        }
-        
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
         testUsers = Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com")

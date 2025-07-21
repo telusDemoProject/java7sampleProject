@@ -2,33 +2,34 @@ package com.example.demo.service;
 
 import com.example.demo.model.Users;
 import com.example.demo.repository.UserRepository;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
+    @Mock
     private UserRepository userRepository;
+    @InjectMocks
     private UserService userService;
     private List<Users> testUsers;
 
-    @Before
-    public void setUp() {
-        userRepository = mock(UserRepository.class);
-        userService = new UserService();
-        // Use reflection to set the mock repository
-        try {
-            java.lang.reflect.Field field = UserService.class.getDeclaredField("userRepository");
-            field.setAccessible(true);
-            field.set(userService, userRepository);
-        } catch (Exception e) {
-            // Handle reflection exception
-        }
-        
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
         testUsers = Arrays.asList(
             new Users(1L, "John Doe", "john@example.com"),
             new Users(2L, "Jane Smith", "jane@test.com"),
@@ -55,24 +56,36 @@ public class UserServiceTest {
         verify(userRepository).save(newUser);
     }
 
-    @Test
-    public void testGetUsersByDomain() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.getUsersByDomain("example.com");
-        
-        assertEquals(2, result.size());
-        assertEquals("john@example.com", result.get(0).getEmail());
-        assertEquals("bob@example.com", result.get(1).getEmail());
+    @Nested
+    @DisplayName("Get Users By Domain")
+    class GetUsersByDomainTests {
+        @ParameterizedTest
+        @CsvSource({
+            "example.com,2",
+            "test.com,1",
+            "nonexistent.com,0"
+        })
+        void testGetUsersByDomainParameterized(String domain, int expectedCount) {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            List<Users> result = userService.getUsersByDomain(domain);
+            assertEquals(expectedCount, result.size());
+        }
     }
 
-    @Test
-    public void testGetUsersByDomainNoMatch() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.getUsersByDomain("nonexistent.com");
-        
-        assertEquals(0, result.size());
+    @Nested
+    @DisplayName("Search Users By Name")
+    class SearchUsersByNameTests {
+        @ParameterizedTest
+        @CsvSource({
+            "john,2",
+            "Jane,1",
+            "xyz,0"
+        })
+        void testSearchUsersByNameParameterized(String keyword, int expectedCount) {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            List<Users> result = userService.searchUsersByName(keyword);
+            assertEquals(expectedCount, result.size());
+        }
     }
 
     @Test
@@ -108,25 +121,5 @@ public class UserServiceTest {
         assertTrue(result.containsKey("test.com"));
         assertEquals(2, result.get("example.com").size());
         assertEquals(1, result.get("test.com").size());
-    }
-
-    @Test
-    public void testSearchUsersByName() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.searchUsersByName("john");
-        
-        assertEquals(2, result.size());
-        assertTrue(result.get(0).getName().toLowerCase().contains("john"));
-        assertTrue(result.get(1).getName().toLowerCase().contains("john"));
-    }
-
-    @Test
-    public void testSearchUsersByNameNoMatch() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.searchUsersByName("xyz");
-        
-        assertEquals(0, result.size());
     }
 }

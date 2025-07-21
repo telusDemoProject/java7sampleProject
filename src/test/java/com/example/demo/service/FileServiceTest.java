@@ -1,12 +1,12 @@
 package com.example.demo.service;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FileServiceTest {
 
@@ -14,8 +14,8 @@ public class FileServiceTest {
     private static final String TEST_FILENAME = "test-file.txt";
     private static final String TEST_CONTENT = "This is test content";
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         fileService = new FileService();
         // Clean up any existing test file
         File testFile = new File("files/" + TEST_FILENAME);
@@ -24,8 +24,8 @@ public class FileServiceTest {
         }
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         // Clean up test file after each test
         File testFile = new File("files/" + TEST_FILENAME);
         if (testFile.exists()) {
@@ -37,7 +37,7 @@ public class FileServiceTest {
     public void testCreateFile() {
         String result = fileService.createFile(TEST_FILENAME, TEST_CONTENT);
         
-        assertEquals("File created successfully.", result);
+        assertEquals("File created successfully.", result.trim());
         
         File file = new File("files/" + TEST_FILENAME);
         assertTrue(file.exists());
@@ -51,7 +51,7 @@ public class FileServiceTest {
         // Try to create same file again
         String result = fileService.createFile(TEST_FILENAME, TEST_CONTENT);
         
-        assertEquals("File already exists.", result);
+        assertEquals("File already exists.", result.trim());
     }
 
     @Test
@@ -61,14 +61,14 @@ public class FileServiceTest {
         
         String result = fileService.readFile(TEST_FILENAME);
         
-        assertEquals(TEST_CONTENT + "\n", result);
+        assertEquals(TEST_CONTENT, result.trim());
     }
 
     @Test
     public void testReadFileNotFound() {
         String result = fileService.readFile("nonexistent.txt");
         
-        assertEquals("File not found.", result);
+        assertEquals("File not found.", result.trim());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class FileServiceTest {
         
         String result = fileService.deleteFile(TEST_FILENAME);
         
-        assertEquals("File deleted successfully.", result);
+        assertEquals("File deleted successfully.", result.trim());
         
         File file = new File("files/" + TEST_FILENAME);
         assertFalse(file.exists());
@@ -88,6 +88,6 @@ public class FileServiceTest {
     public void testDeleteFileNotFound() {
         String result = fileService.deleteFile("nonexistent.txt");
         
-        assertEquals("File not found.", result);
+        assertEquals("File not found.", result.trim());
     }
 }
