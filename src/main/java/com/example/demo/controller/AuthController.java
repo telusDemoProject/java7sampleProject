@@ -9,6 +9,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -21,12 +23,14 @@ public class AuthController {
 
     @PostMapping
     public String authenticate(@RequestParam String username, @RequestParam String password) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password));
-        if (authentication.isAuthenticated()) {
-            return jwtUtil.generateToken(username);
-        } else {
-            throw new UsernameNotFoundException("Invalid user request!");
-        }
+        return Optional.ofNullable(username)
+                .filter(u -> !u.isBlank())
+                .flatMap(u -> Optional.ofNullable(password)
+                        .filter(p -> !p.isBlank())
+                        .map(p -> new UsernamePasswordAuthenticationToken(u, p)))
+                .map(token -> authenticationManager.authenticate(token))
+                .filter(Authentication::isAuthenticated)
+                .map(auth -> jwtUtil.generateToken(username))
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid user request!"));
     }
 }

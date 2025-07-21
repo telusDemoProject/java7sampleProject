@@ -6,7 +6,7 @@ import com.example.demo.model.Users;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.*;
 
 @RestController
@@ -23,18 +23,28 @@ public class UserController {
 
     @PostMapping
     public String addUser(@Valid @RequestBody Users users) {
-        userService.addUser(users);
-        return "Users added";
+        return Optional.ofNullable(users)
+                .map(u -> {
+                    userService.addUser(u);
+                    return "Users added";
+                })
+                .orElse("Invalid user data");
     }
 
     @GetMapping("/by-domain")
     public List<Users> getUsersByDomain(@RequestParam String domain) {
-        return userService.getUsersByDomain(domain);
+        return Optional.ofNullable(domain)
+                .filter(d -> !d.isBlank())
+                .map(userService::getUsersByDomain)
+                .orElse(List.of());
     }
 
     @GetMapping("/sorted")
     public List<Users> getSortedUsers(@RequestParam(defaultValue = "name") String field) {
-        return userService.sortUsersBy(field);
+        return Optional.ofNullable(field)
+                .filter(f -> !f.isBlank())
+                .map(userService::sortUsersBy)
+                .orElse(List.of());
     }
 
     @GetMapping("/grouped-by-domain")
@@ -44,6 +54,9 @@ public class UserController {
 
     @GetMapping("/search")
     public List<Users> searchByName(@RequestParam String keyword) {
-        return userService.searchUsersByName(keyword);
+        return Optional.ofNullable(keyword)
+                .filter(k -> !k.isBlank())
+                .map(userService::searchUsersByName)
+                .orElse(List.of());
     }
 }
