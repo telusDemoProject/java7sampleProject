@@ -1,8 +1,10 @@
 package com.example.demo.util;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JwtUtilSimpleTest {
 
@@ -12,10 +14,11 @@ public class JwtUtilSimpleTest {
         assertNotNull(jwtUtil);
     }
 
-    @Test
-    public void testGenerateTokenNotNull() {
+    @ParameterizedTest
+    @ValueSource(strings = {"user1", "user2"})
+    void testGenerateTokenForDifferentUsers(String username) {
         JwtUtil jwtUtil = new JwtUtil();
-        String token = jwtUtil.generateToken("testuser");
+        String token = jwtUtil.generateToken(username);
         
         assertNotNull(token);
         assertFalse(token.isEmpty());
@@ -43,11 +46,12 @@ public class JwtUtilSimpleTest {
         assertTrue(isValid);
     }
 
-    @Test
-    public void testDifferentUsersGenerateDifferentTokens() {
+    @ParameterizedTest
+    @CsvSource({"user1,user2", "user2,user3"})
+    void testDifferentUsersGenerateDifferentTokens(String username1, String username2) {
         JwtUtil jwtUtil = new JwtUtil();
-        String token1 = jwtUtil.generateToken("user1");
-        String token2 = jwtUtil.generateToken("user2");
+        String token1 = jwtUtil.generateToken(username1);
+        String token2 = jwtUtil.generateToken(username2);
         
         assertNotEquals(token1, token2);
     }

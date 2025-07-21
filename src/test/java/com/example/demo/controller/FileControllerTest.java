@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -22,10 +22,12 @@ import org.springframework.http.MediaType;
 
 import com.example.demo.controller.FileController;
 import com.example.demo.service.FileService;
+import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("deprecation")
-@RunWith(org.mockito.runners.MockitoJUnitRunner.class)
-public class FileControllerTest {
+@ExtendWith(MockitoExtension.class)
+class FileControllerTest {
 	
 	private MockMvc mockMvc;
 	
@@ -35,9 +37,9 @@ public class FileControllerTest {
     @InjectMocks
     private FileController fileController;
 
-	@Before
-	public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+	@BeforeEach
+	void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(fileController).build();
 	}
 

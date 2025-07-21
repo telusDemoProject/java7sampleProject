@@ -2,12 +2,15 @@ package com.example.demo.controller;
 
 import com.example.demo.model.Users;
 import com.example.demo.service.UserService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class UserControllerTest {
@@ -16,8 +19,8 @@ public class UserControllerTest {
     private UserController userController;
     private List<Users> testUsers;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         userService = mock(UserService.class);
         userController = new UserController();
         // Use reflection to set the mock service
@@ -78,30 +81,34 @@ public class UserControllerTest {
         verify(userService).sortUsersBy("name");
     }
 
-    @Test
-    public void testGetGroupedByDomain() {
-        Map<String, List<Users>> groupedUsers = new HashMap<String, List<Users>>();
-        groupedUsers.put("example.com", Arrays.asList(testUsers.get(0)));
-        groupedUsers.put("test.com", Arrays.asList(testUsers.get(1)));
-        
-        when(userService.groupByEmailDomain()).thenReturn(groupedUsers);
+    @Nested
+    class GroupedByDomainTests {
+        @Test
+        void testGetGroupedByDomain() {
+            Map<String, List<Users>> groupedUsers = new HashMap<String, List<Users>>();
+            groupedUsers.put("example.com", Arrays.asList(testUsers.get(0)));
+            groupedUsers.put("test.com", Arrays.asList(testUsers.get(1)));
+            
+            when(userService.groupByEmailDomain()).thenReturn(groupedUsers);
 
-        Map<String, List<Users>> result = userController.getGroupedByDomain();
+            Map<String, List<Users>> result = userController.getGroupedByDomain();
 
-        assertEquals(2, result.size());
-        assertTrue(result.containsKey("example.com"));
-        verify(userService).groupByEmailDomain();
+            assertEquals(2, result.size());
+            assertTrue(result.containsKey("example.com"));
+            verify(userService).groupByEmailDomain();
+        }
     }
 
-    @Test
-    public void testSearchByName() {
+    @ParameterizedTest
+    @ValueSource(strings = {"john", "Jane"})
+    void testSearchByNameParameterized(String keyword) {
         List<Users> searchResults = Arrays.asList(testUsers.get(0));
-        when(userService.searchUsersByName("john")).thenReturn(searchResults);
+        when(userService.searchUsersByName(keyword)).thenReturn(searchResults);
 
-        List<Users> result = userController.searchByName("john");
+        List<Users> result = userController.searchByName(keyword);
 
         assertEquals(1, result.size());
         assertEquals("John Doe", result.get(0).getName());
-        verify(userService).searchUsersByName("john");
+        verify(userService).searchUsersByName(keyword);
     }
 }

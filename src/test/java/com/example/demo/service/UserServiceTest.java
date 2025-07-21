@@ -2,12 +2,13 @@ package com.example.demo.service;
 
 import com.example.demo.model.Users;
 import com.example.demo.repository.UserRepository;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class UserServiceTest {
@@ -16,8 +17,8 @@ public class UserServiceTest {
     private UserService userService;
     private List<Users> testUsers;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         userRepository = mock(UserRepository.class);
         userService = new UserService();
         // Use reflection to set the mock repository
@@ -75,26 +76,29 @@ public class UserServiceTest {
         assertEquals(0, result.size());
     }
 
-    @Test
-    public void testSortUsersByName() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.sortUsersBy("name");
-        
-        assertEquals("Bob Johnson", result.get(0).getName());
-        assertEquals("Jane Smith", result.get(1).getName());
-        assertEquals("John Doe", result.get(2).getName());
-    }
+    @Nested
+    class SortTests {
+        @Test
+        void testSortUsersByName() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            List<Users> result = userService.sortUsersBy("name");
+            
+            assertEquals("Bob Johnson", result.get(0).getName());
+            assertEquals("Jane Smith", result.get(1).getName());
+            assertEquals("John Doe", result.get(2).getName());
+        }
 
-    @Test
-    public void testSortUsersByEmail() {
-        when(userRepository.findAll()).thenReturn(testUsers);
-        
-        List<Users> result = userService.sortUsersBy("email");
-        
-        assertEquals("bob@example.com", result.get(0).getEmail());
-        assertEquals("jane@test.com", result.get(1).getEmail());
-        assertEquals("john@example.com", result.get(2).getEmail());
+        @Test
+        void testSortUsersByEmail() {
+            when(userRepository.findAll()).thenReturn(testUsers);
+            
+            List<Users> result = userService.sortUsersBy("email");
+            
+            assertEquals("bob@example.com", result.get(0).getEmail());
+            assertEquals("jane@test.com", result.get(1).getEmail());
+            assertEquals("john@example.com", result.get(2).getEmail());
+        }
     }
 
     @Test

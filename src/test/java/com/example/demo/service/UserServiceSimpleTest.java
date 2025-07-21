@@ -1,11 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Users;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
-
-import static org.junit.Assert.*;
 
 public class UserServiceSimpleTest {
 
@@ -30,6 +31,24 @@ public class UserServiceSimpleTest {
         assertEquals(2, result.size());
         assertEquals("john@example.com", result.get(0).getEmail());
         assertEquals("bob@example.com", result.get(1).getEmail());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"example.com", "test.com"})
+    void testGetUsersByDomainLogicParameterized(String domain) {
+        List<Users> users = Arrays.asList(
+            new Users(1L, "John Doe", "john@example.com"),
+            new Users(2L, "Jane Smith", "jane@test.com"),
+            new Users(3L, "Bob Johnson", "bob@example.com")
+        );
+        List<Users> result = new ArrayList<>();
+        for (Users u : users) {
+            if (u.getEmail() != null && u.getEmail().endsWith("@" + domain)) {
+                result.add(u);
+            }
+        }
+        int expected = domain.equals("example.com") ? 2 : 1;
+        assertEquals(expected, result.size());
     }
 
     @Test
